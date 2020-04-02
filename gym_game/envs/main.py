@@ -77,7 +77,7 @@ while running:
                 colour = teal
 
                 # Colour of tiles depending on tile
-                if game_map.grid[column][row][i].name == "Wall" or game_map.grid[column][row][i].name == "Wall":
+                if game_map.grid[column][row][i].name == "Wall":
                     colour = gold
                 elif game_map.grid[column][row][i].name == "Red Team":
                     colour = lightRed

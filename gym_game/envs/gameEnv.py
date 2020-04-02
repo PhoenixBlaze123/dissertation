@@ -2,13 +2,9 @@ import pygame
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
-
 from gym_game.envs.gameMap import Map
 
 class GameEnv(gym.Env):
-
-    metadata = {'render.modes': ['human']}
-
     def __init__(self, mapSize=16, tileWidth=40, tileHeight=40, tileMargin=2):
         self.mapSize = mapSize
         self.name = 0
@@ -58,23 +54,22 @@ class GameEnv(gym.Env):
     def close_render(self):
         self.pygame.quit()
 
-    def step(self, action):
+    def step(self, action, game_map, game_type):
         ''' step method for openai, returns: observation, reward, done, info
         '''
 
         # moves the player
-        self.game_map.player.movePlayer(self.possible_actions[action])
+        self.game_map.player.movePlayer(self.possible_actions[action], game_map, game_type)
 
         # get reward
         rwd = self.game_map.player.reward
+        print(rwd)
         return rwd
-
-
 
     def close(self):
         return
 
-    def get_pressed_key(self):
+    def get_key_pressed(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.game_over = True
@@ -111,7 +106,7 @@ class GameEnv(gym.Env):
         self.init_interface()
         running = True
         while running:
-            self.get_key_pressed(self)
+            self.get_key_pressed()
             self.render()
 
     def reset(self):
@@ -129,7 +124,7 @@ class GameEnv(gym.Env):
                     colour = self.teal
 
                     # Colour of tiles depending on tile
-                    if self.game_map.grid[column][row][i].name == "Wall" or self.game_map.grid[column][row][i].name == "Wall":
+                    if self.game_map.grid[column][row][i].name == "Wall":
                         colour = self.gold
                     elif self.game_map.grid[column][row][i].name == "Red Team":
                         colour = self.lightRed
