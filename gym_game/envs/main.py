@@ -97,7 +97,7 @@ while running:
                                               (tileMargin + tileHeight) * row + tileMargin,
                                               tileWidth, tileHeight])
 
-    clock.tick(60)
+    clock.tick(30)
 
     # display flip to prevent error
     pygame.display.flip()

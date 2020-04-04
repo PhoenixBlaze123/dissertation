@@ -101,7 +101,6 @@ class Character(object):
             for i in range(len(game_map.grid[self.column][(self.row) + 1])):
                 if game_map.grid[self.column][(self.row) + 1][i].name == "Wall" or game_map.grid[self.column][(self.row) + 1][i].name == 0 or game_map.grid[self.column][(self.row) + 1][i].name == 1:
                     return False
-
         return True
 
     # shows current location of player for debugging reasons

@@ -35,7 +35,7 @@ class GameEnv(gym.Env):
         self.purpleBlue = (77, 77, 179)
 
         # type of game play, solo_play for 1 player, team_play for 2 players, team_vs for 4 players against each other.
-        self.game_type = "solo_play"
+        self.game_type = "team_play"
 
         # Movement keys
         self.keyLookup = {pygame.K_LEFT: "LEFT", pygame.K_RIGHT: "RIGHT", pygame.K_DOWN: "DOWN", pygame.K_UP: "UP"}
@@ -54,16 +54,16 @@ class GameEnv(gym.Env):
     def close_render(self):
         self.pygame.quit()
 
-    def step(self, action, game_map, game_type):
+    def step(self, action):
         ''' step method for openai, returns: observation, reward, done, info
         '''
 
         # moves the player
-        self.game_map.player.movePlayer(self.possible_actions[action], game_map, game_type)
-
+        #self.game_map.player.movePlayer(self.possible_actions[action], game_map, game_type)
+        self.game_map.player.movePlayer(self.possible_actions[action], self.game_map, self.game_type)
         # get reward
         rwd = self.game_map.player.reward
-        print(rwd)
+        print(str(rwd) + " Moves used:" + str(self.game_map.player.countMovement))
         return rwd
 
     def close(self):
@@ -72,7 +72,7 @@ class GameEnv(gym.Env):
     def get_key_pressed(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.game_over = True
+                self.running = False
 
             # Allow user to see contents of tile when clicking on that tile for debugging reasons
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -143,7 +143,7 @@ class GameEnv(gym.Env):
                 pygame.draw.rect(self.screen, colour, [(self.tileMargin + self.tileWidth) * column + self.tileMargin,
                                                        (self.tileMargin + self.tileHeight) * row + self.tileMargin,
                                                        self.tileWidth, self.tileHeight])
-        self.clock.tick(60)
+        self.clock.tick(30)
 
         # display flip to prevent error
         pygame.display.flip()
