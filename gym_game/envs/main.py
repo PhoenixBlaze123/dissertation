@@ -34,7 +34,7 @@ keyLookup = { pygame.K_LEFT: "LEFT", pygame.K_RIGHT: "RIGHT", pygame.K_DOWN: "DO
 
 # Initialise map object
 game_map = Map(game_type)
-
+print(game_map.count_dirt())
 # run the main code until we exit
 running = True
 while running:
@@ -101,7 +101,6 @@ while running:
 
     # display flip to prevent error
     pygame.display.flip()
-
     # update the map
     game_map.update(game_type)
 

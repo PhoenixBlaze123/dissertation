@@ -3,12 +3,14 @@ from gym_game.envs.gameEnv import GameEnv
 
 env = gym.make('game-v0')
 
-env.reset()
-
+obs = env.reset()
+r = 0
 for _ in range(10000):
     action = env.action_space.sample()
-    #observation, reward, done, info = env.step(action)
-    reward = env.step(action)
+    obs, done, reward, info = env.step(action)
+    r += reward
+    if done:
+        obs = env.reset()
     env.render(mode='human')
-
+#print("Ovservation: ", obs.shape)
 env.close()
