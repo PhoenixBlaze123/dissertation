@@ -1,4 +1,5 @@
 import random
+import numpy as np
 
 class MapTile(object):
     def __init__(self, name, column, row):
@@ -218,7 +219,7 @@ class Map(object):
                     elif self.grid[column][row][i].name == 0:
                         self.grid[column][row].remove(self.grid[column][row][i])
                     elif self.grid[column][row][i].name == 1:
-                       self.grid[column][row].remove(self.grid[column][row][i])
+                        self.grid[column][row].remove(self.grid[column][row][i])
                     elif self.grid[column][row][i].name == 2:
                         self.grid[column][row].remove(self.grid[column][row][i])
                     elif self.grid[column][row][i].name == 3:

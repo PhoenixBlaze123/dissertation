@@ -34,6 +34,11 @@ keyLookup = { pygame.K_LEFT: "LEFT", pygame.K_RIGHT: "RIGHT", pygame.K_DOWN: "DO
 
 # Initialise map object
 game_map = Map(game_type)
+for column in range(16):
+    for row in range(16):
+        for i in range(len(game_map.grid[column][row])):
+            print(game_map.grid[column][row][i].name, game_map.grid[column][row][i].column, game_map.grid[column][row][i].row)
+
 print(game_map.count_dirt())
 # run the main code until we exit
 running = True

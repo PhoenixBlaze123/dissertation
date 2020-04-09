@@ -22,9 +22,6 @@ class GameEnv(gym.Env):
         self.tileHeight = tileHeight
         self.tileMargin = tileMargin
 
-        #get observation space
-        self.observation_space = spaces.Box(low=0, high=255, shape=(self.screenSize, self.screenSize, 3), dtype=np.uint8)
-
         # Colour Definitions
         self.black = (0, 0, 0)
         self.lightRed = (255, 153, 153)
@@ -47,6 +44,8 @@ class GameEnv(gym.Env):
         self.game_map = Map(self.game_type)
         self.game_over = False
 
+        self.observation_space = spaces.Box(0, 255, [self.screenSize, self.screenSize, 3])
+
     def init_interface(self):
         # Initialise the PyGame & create the screen
         self.pygame = pygame
@@ -57,6 +56,39 @@ class GameEnv(gym.Env):
 
     def close_render(self):
         self.pygame.quit()
+
+    def get_colour(self, state):
+        if state == "Dirt":
+            return self.teal
+        elif state == "Wall":
+            return self.gold
+        elif state == "Red Team":
+            return self.lightRed
+        elif state == "Blue Team":
+            return self.blue
+        elif state == 0:
+            return self.darkBlue
+        elif state == 1:
+            return self.purpleBlue
+        elif state == 2:
+            return self.redDark
+        elif state == 3:
+            return self.red
+
+    def  get_image(self, state):
+        color_lu = np.vectorize(lambda x: self.get_colour(x), otypes=[np.uint8, np.uint8, np.uint8])
+        img = np.array(color_lu(state))
+        return img
+
+    def get_observation(self):
+        obs_copy = self.game_map.grid.copy()
+        obs = np.array(obs_copy)
+        print(obs.shape)
+        return obs
+
+    def get_state(self):
+        _state = self.get_observation()
+        return self.get_image(_state)
 
     def step(self, action):
         ''' step method for openai, returns: observation, reward, done, info
@@ -69,13 +101,11 @@ class GameEnv(gym.Env):
             self.game_map.player.movePlayer(self.possible_actions[action], self.game_map, self.game_type)
             self.game_map.player2.movePlayer(self.possible_actions[action], self.game_map, self.game_type)
             rwd = self.game_map.player.reward + self.game_map.player2.reward
-        # get reward
-        #rwd = self.game_map.player.reward
         # get done
         self.check_game_over()
         done = self.game_over
         # get obs
-        obs = {}
+        obs = self.get_observation()
         #get more info
         info = {}
         return obs, done, rwd, info
@@ -146,6 +176,7 @@ class GameEnv(gym.Env):
     def reset(self):
         self.game_over = False
         self.game_map = Map(self.game_type)
+        return self.get_state()
 
     def render(self, mode='human'):
         '''Render method for Open AI'''
