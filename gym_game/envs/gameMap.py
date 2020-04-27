@@ -49,7 +49,7 @@ class Character(object):
                 self.row -= 1
                 # +1 reward logic
                 if self.isBlue(game_map) == False and self.isRed(game_map) == False:
-                    self.reward += 1
+                    self.reward += 5
                 else:
                     self.reward -= 1
                 self.paintBlock(game_map)
@@ -60,7 +60,7 @@ class Character(object):
             if self.column > 0:
                 self.column -= 1
                 if self.isBlue(game_map) == False and self.isRed(game_map) == False:
-                    self.reward += 1
+                    self.reward += 5
                 else:
                     self.reward -= 1
                 self.paintBlock(game_map)
@@ -70,7 +70,7 @@ class Character(object):
             if self.column < 16 - 1:
                 self.column += 1
                 if self.isBlue(game_map) == False and self.isRed(game_map) == False:
-                    self.reward += 1
+                    self.reward += 5
                 else:
                     self.reward -= 1
                 self.paintBlock(game_map)
@@ -80,7 +80,7 @@ class Character(object):
             if self.row < 16 - 1:
                 self.row += 1
                 if self.isBlue(game_map) == False and self.isRed(game_map) == False:
-                    self.reward += 1
+                    self.reward += 5
                 else:
                     self.reward -= 1
                 self.paintBlock(game_map)
@@ -93,25 +93,54 @@ class Character(object):
     def canMove(self, direction, game_map):
         if direction == "UP":
             for i in range(len(game_map.grid[self.column][(self.row) - 1])):
-                if game_map.grid[self.column][(self.row) - 1][i].name == "Wall" or game_map.grid[self.column][(self.row) - 1][i].name == 0 or game_map.grid[self.column][(self.row) - 1][i].name == 1:
+                if game_map.grid[self.column][(self.row) - 1][i].name == "Wall" or\
+                        game_map.grid[self.column][(self.row) - 1][i].name == 0 or\
+                        game_map.grid[self.column][(self.row) - 1][i].name == 1 or\
+                        game_map.grid[self.column][(self.row) - 1][i].name == 2 or\
+                        game_map.grid[self.column][(self.row) - 1][i].name == 3:
                     return False
 
         elif direction == "LEFT":
             for i in range(len(game_map.grid[self.column - 1][(self.row)])):
-                if game_map.grid[self.column - 1][(self.row)][i].name == "Wall" or game_map.grid[self.column - 1][(self.row)][i].name == 0 or game_map.grid[self.column - 1][(self.row)][i].name == 1:
+                if game_map.grid[self.column - 1][(self.row)][i].name == "Wall" or \
+                        game_map.grid[self.column - 1][(self.row)][i].name == 0 or \
+                        game_map.grid[self.column - 1][(self.row)][i].name == 1 or \
+                        game_map.grid[self.column - 1][(self.row)][i].name == 2 or \
+                        game_map.grid[self.column - 1][(self.row)][i].name == 3:
                     return False
 
         elif direction == "RIGHT":
             for i in range(len(game_map.grid[self.column + 1][(self.row)])):
-                if game_map.grid[self.column + 1][(self.row)][i].name == "Wall" or game_map.grid[self.column + 1][(self.row)][i].name == 0 or game_map.grid[self.column + 1][(self.row)][i].name == 1:
+                if game_map.grid[self.column + 1][(self.row)][i].name == "Wall" or\
+                        game_map.grid[self.column + 1][(self.row)][i].name == 0 or\
+                        game_map.grid[self.column + 1][(self.row)][i].name == 1 or\
+                        game_map.grid[self.column + 1][(self.row)][i].name == 2 or\
+                        game_map.grid[self.column + 1][(self.row)][i].name == 3:
                     return False
 
         elif direction == "DOWN":
             for i in range(len(game_map.grid[self.column][(self.row) + 1])):
-                if game_map.grid[self.column][(self.row) + 1][i].name == "Wall" or game_map.grid[self.column][(self.row) + 1][i].name == 0 or game_map.grid[self.column][(self.row) + 1][i].name == 1:
+                if game_map.grid[self.column][(self.row) + 1][i].name == "Wall" or\
+                        game_map.grid[self.column][(self.row) + 1][i].name == 0 or\
+                        game_map.grid[self.column][(self.row) + 1][i].name == 1 or\
+                        game_map.grid[self.column][(self.row) + 1][i].name == 2 or\
+                        game_map.grid[self.column][(self.row) + 1][i].name == 3:
                     return False
         return True
 
+    def randomMovement(self, game_map, game_type):
+        direction = random.choice(["LEFT", "RIGHT", "UP","DOWN"])
+        self.movePlayer(direction, game_map, game_type)
+
+    def floodfill(self, game_map, game_type):
+        if game_map.grid[self.column][self.row + 1][0].name == "Dirt":
+            self.movePlayer("DOWN", game_map, game_type)
+        elif game_map.grid[self.column][self.row - 1][0].name == "Dirt":
+            self.movePlayer("UP", game_map, game_type)
+        elif game_map.grid[self.column + 1][self.row][0].name == "Dirt":
+            self.movePlayer("RIGHT", game_map, game_type)
+        elif game_map.grid[self.column - 1][self.row][0].name == "Dirt":
+            self.movePlayer("LEFT", game_map, game_type)
     # shows current location of player for debugging reasons
     def location(self):
         print("Coordinates: " + str(self.row)) + ", " + str(self.column)
@@ -174,7 +203,6 @@ class Map(object):
                     if self.grid[randomColumn][randomRow][i].name == "Dirt" or self.grid[randomColumn][randomRow][i].name == "Wall":
                         self.grid[randomColumn][randomRow].remove(self.grid[randomColumn][randomRow][i])
                 self.grid[randomColumn][randomRow].append(tempTile)
-
     # create players and choose location of player spawn
     # 2 players for regular game mode, and 4 players for vs game mode
     def create_players(self, game_type):

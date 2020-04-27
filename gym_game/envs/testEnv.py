@@ -12,7 +12,6 @@ for _ in range(100000):
     if done:
         obs = env.reset()
     env.render(mode='human')
-
-#print("Observation: ", obs.shape)
-
 env.close()
+
+

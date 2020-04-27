@@ -6,7 +6,9 @@ from gym.utils import seeding
 from gym_game.envs.gameMap import Map
 
 class GameEnv(gym.Env):
+    metadata = {'render.modes': ['human']}
     def __init__(self, mapSize=16, tileWidth=40, tileHeight=40, tileMargin=2):
+        super(GameEnv, self).__init__()
         self.mapSize = mapSize
         self.name = 0
         self.reward_threshold = 0.0
@@ -36,7 +38,7 @@ class GameEnv(gym.Env):
         self.white = (255, 255, 255)
 
         # type of game play, solo_play for 1 player, team_play for 2 players, team_vs for 4 players against each other.
-        self.game_type = "team_play"
+        self.game_type = "team_vs"
         # Movement keys
         self.keyLookup = {pygame.K_LEFT: "LEFT", pygame.K_RIGHT: "RIGHT", pygame.K_DOWN: "DOWN", pygame.K_UP: "UP"}
 
@@ -44,7 +46,7 @@ class GameEnv(gym.Env):
         self.game_map = Map(self.game_type)
         self.game_over = False
 
-        self.observation_space = spaces.Box(0, 255, [self.screenSize, self.screenSize, 3])
+        self.observation_space = spaces.Box(low=0, high=255, shape=(self.mapSize, self.mapSize, 3), dtype='uint8')
 
     def init_interface(self):
         # Initialise the PyGame & create the screen
@@ -57,38 +59,38 @@ class GameEnv(gym.Env):
     def close_render(self):
         self.pygame.quit()
 
-    def get_colour(self, state):
-        if state == "Dirt":
+    def get_colour(self, col, row):
+        if self.game_map.grid[col][row][0].name == "Dirt":
             return self.teal
-        elif state == "Wall":
+        elif self.game_map.grid[col][row][0].name == "Wall":
             return self.gold
-        elif state == "Red Team":
+        elif self.game_map.grid[col][row][0].name == "Red Team":
             return self.lightRed
-        elif state == "Blue Team":
+        elif self.game_map.grid[col][row][0].name == "Blue Team":
             return self.blue
-        elif state == 0:
+        elif self.game_map.grid[col][row][0].name == 0:
             return self.darkBlue
-        elif state == 1:
+        elif self.game_map.grid[col][row][0].name == 1:
             return self.purpleBlue
-        elif state == 2:
+        elif self.game_map.grid[col][row][0].name == 2:
             return self.redDark
-        elif state == 3:
+        elif self.game_map.grid[col][row][0].name == 3:
             return self.red
 
-    def  get_image(self, state):
-        color_lu = np.vectorize(lambda x: self.get_colour(x), otypes=[np.uint8, np.uint8, np.uint8])
-        img = np.array(color_lu(state))
-        return img
-
-    def get_observation(self):
-        obs_copy = self.game_map.grid.copy()
-        obs = np.array(obs_copy)
-        print(obs.shape)
-        return obs
-
     def get_state(self):
-        _state = self.get_observation()
-        return self.get_image(_state)
+        rgb_state = []
+        # create empty 3D array to match the grid map
+        for row in range(16):
+            rgb_state.append([])
+            for column in range(16):
+                rgb_state[row].append([])
+        # assign RGB values to array
+        for col in range(16):
+            for row in range(16):
+                rgb_state[col][row].append(self.get_colour(col, row))
+        img = np.array(rgb_state)
+        img_reshaped = img.reshape(16, 16, 3)
+        return img_reshaped
 
     def step(self, action):
         ''' step method for openai, returns: observation, reward, done, info
@@ -101,11 +103,19 @@ class GameEnv(gym.Env):
             self.game_map.player.movePlayer(self.possible_actions[action], self.game_map, self.game_type)
             self.game_map.player2.movePlayer(self.possible_actions[action], self.game_map, self.game_type)
             rwd = self.game_map.player.reward + self.game_map.player2.reward
+        elif self.game_type == "team_vs":
+            self.game_map.player.movePlayer(self.possible_actions[action], self.game_map, self.game_type)
+            self.game_map.player2.movePlayer(self.possible_actions[action], self.game_map, self.game_type)
+            rwd = self.game_map.player.reward + self.game_map.player2.reward
+            self.game_map.player3.randomMovement(self.game_map, self.game_type)
+            self.game_map.player4.randomMovement(self.game_map, self.game_type)
         # get done
         self.check_game_over()
         done = self.game_over
+        if done == True:
+            rwd += 50
         # get obs
-        obs = self.get_observation()
+        obs = self.get_state()
         #get more info
         info = {}
         return obs, done, rwd, info
